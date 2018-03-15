@@ -58,6 +58,48 @@ class Timeseries(T) {
     }
 
     /**
+     * If the timeseries contains vectors, returns a timeseries of their x values
+     */
+    static if(is(T == Vector)) {
+        @property Timeseries!double xSeries() {
+            assert(this.members.length == this.times.length);
+            Timeseries!double xValues = new Timeseries!double();
+            foreach(i; 0..this.members.length) {
+                xValues.add(this.times[i], this.members[i].x);
+            }
+            return xValues;
+        }
+    }
+
+    /**
+     * If the timeseries contains vectors, returns a timeseries of their y values
+     */
+    static if(is(T == Vector)) {
+        @property Timeseries!double ySeries() {
+            assert(this.members.length == this.times.length);
+            Timeseries!double yValues = new Timeseries!double();
+            foreach(i; 0..this.members.length) {
+                yValues.add(this.times[i], this.members[i].y);
+            }
+            return yValues;
+        }
+    }
+
+    /**
+     * If the timeseries contains vectors, returns a timeseries of their x values
+     */
+    static if(is(T == Vector)) {
+        @property Timeseries!double zSeries() {
+            assert(this.members.length == this.times.length);
+            Timeseries!double zValues = new Timeseries!double();
+            foreach(i; 0..this.members.length) {
+                zValues.add(this.times[i], this.members[i].z);
+            }
+            return zValues;
+        }
+    }
+
+    /**
      * Constructs a timeseries from an existing list of states
      */
     this(T[] members, double[] times) {
