@@ -1,0 +1,14 @@
+{
+	"name": "assim-demo",
+	"authors": [
+		"Elia Gorokhovsky"
+	],
+	"dependencies": {
+		"d2d": "~>1.5.1",
+		"dstats": "~>1.0.3",
+		"mir-random": "~>0.3.1"
+	},
+	"description": "An interactive demo of data assimilation",
+	"copyright": "Copyright © 2018, Elia Gorokhovsky",
+	"license": "proprietary"
+}

@@ -1,0 +1,12 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"d2d": "1.5.1",
+		"derelict-sdl2": "3.1.0-alpha.3",
+		"derelict-util": "3.0.0-beta.2",
+		"dstats": "1.0.5",
+		"mir-algorithm": "0.8.0",
+		"mir-linux-kernel": "1.0.0",
+		"mir-random": "0.3.6"
+	}
+}

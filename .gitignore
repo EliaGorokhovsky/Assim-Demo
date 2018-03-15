@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+assim-demo.so
+assim-demo.dylib
+assim-demo.dll
+assim-demo.a
+assim-demo.lib
+assim-demo-test-*
+*.exe
+*.o
+*.obj
+*.lst
+*.dll
