@@ -4,7 +4,7 @@
 		"Elia Gorokhovsky"
 	],
 	"dependencies": {
-		"d2d": "~>1.5.1",
+		"d2d": "~>1.5.2",
 		"dstats": "~>1.0.3",
 		"mir-random": "~>0.3.1"
 	},
