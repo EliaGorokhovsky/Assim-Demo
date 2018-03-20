@@ -13,11 +13,11 @@ void main(){
             "Assimilation Demo");
     mainDisplay.activity = new MainActivity(
 		mainDisplay, 
-		new LorenzPoint(0.01, 0, 1, 1, 1), 
+		new LorenzPoint(0.02, 0, 1, 1, 1), 
 		//new RandomPoint(new dVector(-20, 20), 0.01, 0),
 		new AxisAlignedBoundingBox!(int, 2)(new iVector(0, 0), logicalSize),
-		new dVector(-1, 1),
-		new dVector(-20, 20)
+		new dVector(-10, 5),
+		new dVector(-15, 15)
 	);
     mainDisplay.renderer.logicalSize = logicalSize; //logicalSize defined in graphics.Constants
     mainDisplay.eventHandlers ~= new class EventHandler {

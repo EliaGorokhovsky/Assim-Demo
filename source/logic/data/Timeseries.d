@@ -123,6 +123,14 @@ class Timeseries(T) {
     }
 
     /**
+     * Removes the nth element of a timeseries
+     */
+    void pop(uint index) {
+        this.times.remove(index);
+        this.members.remove(index);
+    }
+
+    /**
      * Assuming times are sorted, finds the value of the state at a given time
      * If there is no corresponding state in the timeseries, use an integrator
      * TODO: Interpolate instead

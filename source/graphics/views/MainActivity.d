@@ -41,7 +41,10 @@ class MainActivity : Activity {
     /**
      * Action taken every frame
      */
-    override void update() {        
+    override void update() {     
+        if(this.xScale.x > this.pointGetter.points.times[0]) {
+            this.pointGetter.points.pop(0);
+        }   
         //if(((this.yScale.x + this.yScale.y) / 2 / this.pointGetter.dt).approxEqual(floor((this.yScale.x + this.yScale.y) / 2 / this.pointGetter.dt))) { 
             this.pointGetter.getPoint();
         //}
