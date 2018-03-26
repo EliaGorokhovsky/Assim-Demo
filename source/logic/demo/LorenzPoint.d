@@ -1,5 +1,6 @@
 module logic.demo.LorenzPoint;
 
+import logic.data.Timeseries;
 import logic.data.Vector;
 import logic.demo.PointGetter;
 import logic.integrators.RK4;
@@ -20,7 +21,8 @@ class LorenzPoint : PointGetter {
         this.position = Vector(x, y, z); 
         this.initialPosition = this.position.x;
         this.startTime = startTime;
-        this.integrator = new RK4(this.system);      
+        this.integrator = new RK4(this.system);  
+        this.points = new Timeseries!double([x], [startTime]);    
     }
 
     override double getPoint() {

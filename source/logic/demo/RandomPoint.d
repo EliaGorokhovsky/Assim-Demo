@@ -2,6 +2,7 @@ module logic.demo.RandomPoint;
 
 import std.random;
 import d2d;
+import logic.data.Timeseries;
 import logic.demo.PointGetter;
 
 /**
@@ -15,6 +16,7 @@ class RandomPoint : PointGetter {
         this.scale = scale;
         this.dt = dt;
         this.time = startTime;
+        this.points = new Timeseries!double();  
     }
 
     override double getPoint() {

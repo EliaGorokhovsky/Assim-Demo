@@ -7,7 +7,7 @@ import logic.data.Timeseries;
  */
 abstract class PointGetter {
 
-    Timeseries!double points = new Timeseries!double(); ///The list of points that are created by this object
+    Timeseries!double points; ///The list of points that are created by this object
     double dt;
     double time; ///The time at which a measurement should be taken
     double startTime;
