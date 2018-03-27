@@ -16,7 +16,6 @@ void main(){
     mainDisplay.activity = new MainActivity(
 		mainDisplay, 
 		[new LorenzPoint(dt, startTime, 1, 1, 1), new LorenzPoint(dt, startTime, 1.01, 1.01, 1.01), new LorenzPoint(dt, startTime, 0.99, 0.99, 0.99)], 
-		//new RandomPoint(new dVector(-20, 20), 0.01, 0),
 		new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 16), new iVector(logicalSize.x * 3 / 4, logicalSize.y * 7 / 8)),
 		new dVector(-20, 10),
 		new dVector(-15, 15)
