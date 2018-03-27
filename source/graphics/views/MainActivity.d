@@ -23,6 +23,7 @@ class MainActivity : Activity {
     iVector[][] toDraw; ///The points to be drawn in a frame
     Color[] colors; ///The colors of each of the curves to draw
     Font font; ///The font with which to draw text
+    bool isRunning; ///Whether the demo is paused
 
     /**
      * Constructor for the main activity
@@ -44,6 +45,9 @@ class MainActivity : Activity {
      * Handles keyboard and mouse events
      */
     override void handleEvent(SDL_Event event) {
+        if (this.container.keyboard.allKeys[SDLK_ESCAPE].testAndRelease()) {
+            this.isRunning = !this.isRunning;
+        }
     }
 
     /**
@@ -54,15 +58,11 @@ class MainActivity : Activity {
         if(this.xScale.x > pointGetter.points.times[0]) {
             pointGetter.points.pop(0);
         }  
-        //if(((this.yScale.x + this.yScale.y) / 2 / this.pointGetter.dt).approxEqual(floor((this.yScale.x + this.yScale.y) / 2 / this.pointGetter.dt))) { 
-            pointGetter.getPoint();
-        //}
+        pointGetter.getPoint();
         double[double] associate = pointGetter.points.timeAssociate;
-        //import std.stdio; writeln("Curve ", index, ": ", associate);
         this.drawablePoints[index] = associate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
         this.toDraw[index] = null;
         assert(toDraw[index].length == 0, "toDraw isn't being emptied");
-        //import std.stdio; writeln(index, ", ", this.drawablePoints[index].sort.map!(a => associate[a]));
         foreach(val; this.drawablePoints[index].sort) {
             if(this.yScale.x <= associate[val] && associate[val] <= this.yScale.y) {
                 this.toDraw[index] ~= cast(iVector) new dVector(
@@ -71,16 +71,17 @@ class MainActivity : Activity {
                 );
             }
         }
-        //writeln(associate);
     }
 
     /**
      * Action taken every frame
      */
     override void update() {
-        this.xScale += this.pointGetters[0].dt;
-        foreach(i; 0..this.pointGetters.length) {
-            this.update(i);
+        if(isRunning) {
+            this.xScale += this.pointGetters[0].dt;
+            foreach(i; 0..this.pointGetters.length) {
+                this.update(i);
+            }
         }
     }
 
