@@ -10,35 +10,35 @@ import logic.demo.EnsembleFollower;
 import logic.demo.RandomPoint;
 import logic.demo.LorenzPoint;
 import logic.demo.PointGetter;
+import logic.demo.GaussianObserver;
 import logic.integrators.RK4;
 import logic.systems.Lorenz63;
 
 void main(){
 	double dt = 0.05;
+    double observationFrequency = 1;
 	double startTime = 0;
 	Display mainDisplay = new Display(640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE,
             "Assimilation Demo");
     //Point getters
-    Color[] colors = [];
     LorenzPoint truth = new LorenzPoint(dt, startTime, 1, 1, 1);
-    colors ~= PredefinedColor.RED;
-    EnsembleLeader leader = new EnsembleLeader(new RK4(new Lorenz63()), new Ensemble([1.01, 1, 0.99], [1.01, 1.01, 0.99], [1.01, 1, 0.99]), dt, 0);
-    colors ~= PredefinedColor.BLUE;
-    PointGetter[] followers;
-    /*foreach(i; 0..leader.ensemble.size) {
+    EnsembleLeader leader = new EnsembleLeader(new RK4(new Lorenz63()), new Ensemble([]), dt, 0);
+    leader.createEnsemble(1, 1, 1, 1, 1, 1, 5);
+    EnsembleFollower[] followers;
+    foreach(i; 0..leader.ensemble.size) {
         followers ~= new EnsembleFollower(leader, cast(int)i);
-        colors ~= PredefinedColor.GREEN;
-    }*/
+    }
+    GaussianObserver observer = new GaussianObserver(0.5, 0.5, 0.5);
 
     mainDisplay.activity = new MainActivity(
         mainDisplay, 
-        truth, leader, [],
-        PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN,
+        truth, leader, followers, observer,
+        PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK,
         new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 16), new iVector(logicalSize.x * 3 / 4, logicalSize.y * 7 / 8)),
-        new dVector(-20, 10),
+        new dVector(-10, 5),
         new dVector(-15, 15),
-        dt
+        dt, observationFrequency
     );
     mainDisplay.renderer.logicalSize = logicalSize; //logicalSize defined in graphics.Constants
     mainDisplay.eventHandlers ~= new class EventHandler {

@@ -26,6 +26,14 @@ class EnsembleLeader : PointGetter {
         this.points = new Timeseries!double([this.ensemble.eMean.x], [this.time]);  
     }
 
+    /**
+     * Creates an ensemble of given size, error, and mean
+     * Necessary because my implementation of Vector conflicts with d2d's
+     */
+    void createEnsemble(double x, double y, double z, double xError, double yError, double zError, int size) {
+        this.ensemble = new Ensemble(Vector(x, y, z), size, Vector(xError, yError, zError));
+    }
+
     override double getPoint() {
         this.time += this.dt;
         this.ensemble = this.integrator.integrateEnsemble(this.ensemble, this.dt);

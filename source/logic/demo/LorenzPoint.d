@@ -11,7 +11,6 @@ import logic.systems.Lorenz63;
  */
 class LorenzPoint : PointGetter { 
 
-    Vector position;
     Lorenz63 system = new Lorenz63();
 
     this(double dt, double startTime, double x, double y, double z) {
