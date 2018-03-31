@@ -13,7 +13,6 @@ class LorenzPoint : PointGetter {
 
     Vector position;
     Lorenz63 system = new Lorenz63();
-    RK4 integrator;
 
     this(double dt, double startTime, double x, double y, double z) {
         this.dt = dt;
@@ -23,12 +22,13 @@ class LorenzPoint : PointGetter {
         this.startTime = startTime;
         this.integrator = new RK4(this.system);  
         this.points = new Timeseries!double([x], [startTime]);    
+        this.system = new Lorenz63();
     }
 
     override double getPoint() {
         this.time += this.dt;
         this.position = integrator.integrate(this.position, this.dt);
-        this.points.add(time, this.position.x);
+        this.points.add(this.time, this.position.x);
         return this.position.x;
     }
 

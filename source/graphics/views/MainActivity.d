@@ -6,7 +6,9 @@ import std.conv;
 import std.math;
 import d2d;
 import graphics.Constants;
+import graphics.components.PauseButton;
 import logic.demo.PointGetter;
+import logic.demo.LorenzPoint;
 
 /**
  * The site of the main UI
@@ -17,19 +19,21 @@ class MainActivity : Activity {
     double[][] drawablePoints; ///All the points to be on the screen
     AxisAlignedBoundingBox!(int, 2) location; ///The location of the graph element
     dVector xScale; ///The range of x(time) values represented on the graph
-    uint xTicks = 5; ///How many tick marks are represented on the time scale
+    uint xTicks = 4; ///How many tick marks are represented on the time scale
     dVector yScale; ///The range of y values represented on the graph
     uint yTicks = 5; ///How many tick marks are represented on the y scale
     iVector[][] toDraw; ///The points to be drawn in a frame
     Color[] colors; ///The colors of each of the curves to draw
     Font font; ///The font with which to draw text
     bool isRunning; ///Whether the demo is paused
+    double dt; ///How fast the scale moves in time
+    double time = 0; ///Where the front is in time
 
     /**
      * Constructor for the main activity
      * Organizes the components into locations 
      */
-    this(Display display, PointGetter[] pointGetters, AxisAlignedBoundingBox!(int, 2) location, dVector xScale, dVector yScale) { 
+    this(Display display, PointGetter[] pointGetters, Color[] colors, AxisAlignedBoundingBox!(int, 2) location, dVector xScale, dVector yScale, double dt) { 
         super(display);
         this.font = new Font("res/fonts/OpenSansRegular.ttf", 100);
         this.pointGetters = pointGetters;
@@ -38,7 +42,9 @@ class MainActivity : Activity {
         this.yScale = yScale;
         foreach(pointGetter; pointGetters) this.drawablePoints ~= pointGetter.points.timeAssociate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
         foreach(pointGetter; pointGetters) this.toDraw ~= null;
-        this.colors = [PredefinedColor.BLUE, PredefinedColor.RED, PredefinedColor.GREEN];
+        this.colors = colors;
+        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
+        this.dt = dt;
     }
 
     /**
@@ -54,10 +60,10 @@ class MainActivity : Activity {
      * Updates the toDraw list of pointGetters
      */
     void update(uint index) {
-        PointGetter pointGetter = this.pointGetters[index];     
+        PointGetter pointGetter = this.pointGetters[index];    
         if(this.xScale.x > pointGetter.points.times[0]) {
             pointGetter.points.pop(0);
-        }  
+        }
         pointGetter.getPoint();
         double[double] associate = pointGetter.points.timeAssociate;
         this.drawablePoints[index] = associate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
@@ -78,7 +84,8 @@ class MainActivity : Activity {
      */
     override void update() {
         if(isRunning) {
-            this.xScale += this.pointGetters[0].dt;
+            this.xScale += this.dt;
+            this.time += this.dt;
             foreach(i; 0..this.pointGetters.length) {
                 this.update(i);
             }
@@ -89,16 +96,15 @@ class MainActivity : Activity {
      * Draw instructions for the window
      */
     override void draw() {
-        this.container.renderer.clear(PredefinedColor.WHITE);
-        this.container.renderer.fill(this.location, PredefinedColor.LIGHTGREY);
+        this.container.renderer.clear(PredefinedColor.LIGHTGREY);
+        this.container.renderer.fill(this.location, PredefinedColor.WHITE);
         //Draw curves
         foreach(curve; 0..this.drawablePoints.length) {
             if(this.toDraw[curve].length > 1) {
                 foreach(i; 0..this.toDraw[curve].length - 1) {
                     this.container.renderer.draw(new iSegment(this.toDraw[curve][i], this.toDraw[curve][i + 1]), this.colors[curve]);
                 }
-            //this.container.renderer.fill(new AxisAlignedBoundingBox!(int, 2)(this.toDraw[$ - 1] - 5, new iVector(10, 10)), PredefinedColor.GREEN);  
-            //this.container.renderer.draw(new iSegment(new iVector(this.toDraw[$ - 1].x, this.location.initialPoint.y), new iVector(this.toDraw[$ - 1].x, this.location.bottomLeft.y)), PredefinedColor.RED);      
+                this.container.renderer.fill(new AxisAlignedBoundingBox!(int, 2)(this.toDraw[curve][$ - 1] - 5, new iVector(10, 10)), this.colors[curve]);  
             } else if(this.toDraw[curve].length == 1) {
                 this.container.renderer.draw(this.toDraw[curve][0]);
             }

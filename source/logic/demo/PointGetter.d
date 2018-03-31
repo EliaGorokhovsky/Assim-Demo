@@ -1,6 +1,8 @@
 module logic.demo.PointGetter;
 
 import logic.data.Timeseries;
+import logic.integrators.Integrator;
+import logic.integrators.RK4;
 
 /**
  * Controls getting point values to display.
@@ -12,6 +14,7 @@ abstract class PointGetter {
     double time; ///The time at which a measurement should be taken
     double startTime;
     double initialPosition;
+    Integrator integrator; ///Only useful in differential systems but needed for ensembles
 
     double getPoint(); ///All child classes must be able to return a point value
 
