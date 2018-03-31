@@ -9,6 +9,7 @@ import logic.data.Vector;
 abstract class ErrorGenerator {
 
     Timeseries!double points;
+    Vector error;
 
     Vector observe(Vector base, double time);
 

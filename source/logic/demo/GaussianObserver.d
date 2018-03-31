@@ -11,8 +11,6 @@ import logic.demo.ErrorGenerator;
  */
 class GaussianObserver : ErrorGenerator {
 
-    Vector error;
-
     this(double xError, double yError, double zError) {
         this.error = Vector(xError, yError, zError);
         this.points = new Timeseries!double([], []);

@@ -7,6 +7,8 @@ import std.math;
 import d2d;
 import graphics.Constants;
 import graphics.components.PauseButton;
+import logic.assimilation.Assimilator;
+import logic.assimilation.likelihood.Likelihood;
 import logic.demo.EnsembleLeader;
 import logic.demo.EnsembleFollower;
 import logic.demo.PointGetter;
@@ -40,6 +42,12 @@ class MainActivity : Activity {
     double observationFrequency; ///How frequently measurements are taken
     double time = 0; ///Where the front is in time
     ErrorGenerator observer; ///How observations are recorded
+    Assimilator assimilator; ///Handles assimilation
+    double errorSum = 0; ///Used in calculating RMSE; sum of squares of error
+    double xErrorSum = 0; ///Error sum as if x were the only variable
+    double RMSE; ///Root mean square error (sqrt of the mean of the squares of the distances between truth and ensemble mean)
+    double xRMSE; ///RMSE in x
+    int numTimes = 0; ///How many times should be counted in RMSE
 
     /**
      * Constructor for the main activity
@@ -48,7 +56,7 @@ class MainActivity : Activity {
     this(
             Display display, 
             PointGetter truth, EnsembleLeader ensembleMean, EnsembleFollower[] ensembleMembers, 
-            ErrorGenerator observer,
+            ErrorGenerator observer, Assimilator assimilator,
             Color truthColor, Color ensembleMeanColor, Color ensembleColor, Color observationColor,
             AxisAlignedBoundingBox!(int, 2) location, 
             dVector xScale, dVector yScale, 
@@ -83,6 +91,8 @@ class MainActivity : Activity {
         this.drawablePoints ~= null; //for observations
         this.toDraw ~= null;
         this.observationColor = observationColor;
+        //Assimilation
+        this.assimilator = assimilator;
 
         this.pointGetters = [this.truth, this.ensembleMean] ~ cast(PointGetter[]) this.ensembleMembers;
         this.colors = [this.truthColor, this.ensembleMeanColor];
@@ -151,9 +161,28 @@ class MainActivity : Activity {
                 this.update(i);
             }
             if(abs(this.time % this.observationFrequency) < this.dt) {
-                this.observer.observe(this.truth.position, this.time);
+                Likelihood likelihood = new Likelihood(this.observer.observe(this.truth.position, this.time), this.observer.error);
+                this.assimilator.setLikelihood(likelihood);
+                this.ensembleMean.ensemble = this.assimilator(this.ensembleMean.ensemble);
+                //The following code makes the ensemble generate twice on assimilation. It may look nicer
+                //Comment if speed is a concern
+                /*this.ensembleMean.points.add(this.time, this.ensembleMean.ensemble.eMean.x);
+                foreach(point; this.ensembleMembers) {
+                    point.points.add(this.time, this.ensembleMean.ensemble.members[point.index].x);
+                }*/
             }
             this.updateObservations();
+            double ensx = this.ensembleMean.ensemble.eMean.x;
+            double ensy = this.ensembleMean.ensemble.eMean.y;
+            double ensz = this.ensembleMean.ensemble.eMean.z;
+            double truex = this.truth.position.x;
+            double truey = this.truth.position.y;
+            double truez = this.truth.position.z;
+            this.numTimes += 1;
+            this.xErrorSum += (truex - ensx).pow(2);
+            this.errorSum += (truex - ensx).pow(2) + (truey - ensy).pow(2) + (truez - ensz).pow(2);
+            this.RMSE = sqrt(this.errorSum / this.numTimes);
+            this.xRMSE = sqrt(this.xErrorSum / this.numTimes);
         }
     }
 
@@ -223,5 +252,11 @@ class MainActivity : Activity {
         this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 80, this.location.bottomRight.y - 20, 20, 40));
         text = new Texture(this.font.renderTextSolid("x"), this.container.renderer);
         this.container.renderer.copy(text, new iRectangle(this.location.initialPoint.x - 10, this.location.initialPoint.y - 40 - logicalSize.y / 80, 20, 40));
+        //Write RMSE
+        text = new Texture(this.font.renderTextSolid("RMSE: " ~ this.RMSE.to!string), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10, 20 * (6 + this.RMSE.to!string.length), 40));
+        text = new Texture(this.font.renderTextSolid("xRMSE: " ~ this.xRMSE.to!string), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10 - 45, 20 * (7 + this.xRMSE.to!string.length), 40));
+
     }
 }

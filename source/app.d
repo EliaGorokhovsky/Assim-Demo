@@ -4,6 +4,7 @@ import std.stdio;
 import d2d;
 import graphics.Constants;
 import graphics.views.MainActivity;
+import logic.assimilation.EAKF;
 import logic.data.Ensemble;
 import logic.demo.EnsembleLeader;
 import logic.demo.EnsembleFollower;
@@ -29,11 +30,12 @@ void main(){
     foreach(i; 0..leader.ensemble.size) {
         followers ~= new EnsembleFollower(leader, cast(int)i);
     }
-    GaussianObserver observer = new GaussianObserver(0.5, 0.5, 0.5);
+    GaussianObserver observer = new GaussianObserver(1, 1, 1);
 
     mainDisplay.activity = new MainActivity(
         mainDisplay, 
-        truth, leader, followers, observer,
+        truth, leader, followers, 
+        observer, new EAKF(),
         PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK,
         new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 16), new iVector(logicalSize.x * 3 / 4, logicalSize.y * 7 / 8)),
         new dVector(-10, 5),
