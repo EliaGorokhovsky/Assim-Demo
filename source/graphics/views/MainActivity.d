@@ -27,6 +27,8 @@ class MainActivity : Activity {
     double[][] drawablePoints; ///All the points to be on the screen
     AxisAlignedBoundingBox!(int, 2) location; ///The location of the graph element
     dVector xScale; ///The range of x(time) values represented on the graph
+    int moveScale = 2; ///The factor by which xScale moves every button press, scaling dt
+    dVector xOffset; ///The default offset in time from the current running time
     uint xTicks = 4; ///How many tick marks are represented on the time scale
     dVector yScale; ///The range of y values represented on the graph
     uint yTicks = 5; ///How many tick marks are represented on the y scale
@@ -48,6 +50,7 @@ class MainActivity : Activity {
     double RMSE; ///Root mean square error (sqrt of the mean of the squares of the distances between truth and ensemble mean)
     double xRMSE; ///RMSE in x
     int numTimes = 0; ///How many times should be counted in RMSE
+    bool garbageCollect; ///Should points off the screen be deleted? if false, demo may slow down but you'll be able to return
 
     /**
      * Constructor for the main activity
@@ -65,6 +68,7 @@ class MainActivity : Activity {
         super(display);
         this.location = location;
         this.xScale = xScale;
+        this.xOffset = new dVector(xScale);
         this.yScale = yScale;
         this.dt = dt;
         this.observationFrequency = observationFrequency;
@@ -103,11 +107,31 @@ class MainActivity : Activity {
     }
 
     /**
+     * Resets the scale to center the current time
+     * Done in a separate function for expandability
+     */
+    void resetToScale() {
+        this.xScale = new dVector(this.xOffset + this.time);
+    }
+
+    /**
      * Handles keyboard and mouse events
+     * TODO: Make buttons for this
      */
     override void handleEvent(SDL_Event event) {
         if (this.container.keyboard.allKeys[SDLK_ESCAPE].testAndRelease()) {
             this.isRunning = !this.isRunning;
+        }
+        if(!isRunning) {
+            if(this.container.keyboard.allKeys[SDLK_LEFT].testAndRelease()) {
+                this.xScale -= this.moveScale * this.dt;
+            }
+            if(this.container.keyboard.allKeys[SDLK_RIGHT].testAndRelease()) {
+                this.xScale += this.moveScale * this.dt;
+            }
+            if(this.container.keyboard.allKeys[SDLK_SPACE].testAndRelease()) {
+                this.resetToScale;
+            }
         }
     }
 
@@ -116,10 +140,30 @@ class MainActivity : Activity {
      */
     void update(uint index) {
         PointGetter pointGetter = this.pointGetters[index];    
-        if(this.xScale.x > pointGetter.points.times[0]) {
+        if(this.xScale.x > pointGetter.points.times[0] && this.garbageCollect) {
             pointGetter.points.pop(0);
         }
         pointGetter.getPoint();
+        double[double] associate = pointGetter.points.timeAssociate;
+        this.drawablePoints[index] = associate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
+        this.toDraw[index] = null;
+        foreach(val; this.drawablePoints[index].sort) {
+            if(this.yScale.x <= associate[val] && associate[val] <= this.yScale.y) {
+                this.toDraw[index] ~= cast(iVector) new dVector(
+                    this.location.initialPoint.x + (val - this.xScale.x) * (this.location.extent.x) / (this.xScale.y - this.xScale.x),
+                    this.location.initialPoint.y + (associate[val] - this.yScale.x) * (this.location.extent.y) / (this.yScale.y - this.yScale.x)
+                );
+            }
+        }
+    }
+
+    /**
+     * Update without getting points
+     * Used when not running and returning
+     * Should probably be combined with update
+     */
+    void updateStagnant(uint index) {
+        PointGetter pointGetter = this.pointGetters[index];    
         double[double] associate = pointGetter.points.timeAssociate;
         this.drawablePoints[index] = associate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
         this.toDraw[index] = null;
@@ -183,6 +227,11 @@ class MainActivity : Activity {
             this.errorSum += (truex - ensx).pow(2) + (truey - ensy).pow(2) + (truez - ensz).pow(2);
             this.RMSE = sqrt(this.errorSum / this.numTimes);
             this.xRMSE = sqrt(this.xErrorSum / this.numTimes);
+        } else {
+            foreach(i; 0..this.pointGetters.length) {
+                this.updateStagnant(i);
+            }
+            this.updateObservations;
         }
     }
 
