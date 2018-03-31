@@ -7,6 +7,8 @@ import std.math;
 import d2d;
 import graphics.Constants;
 import graphics.components.PauseButton;
+import logic.demo.EnsembleLeader;
+import logic.demo.EnsembleFollower;
 import logic.demo.PointGetter;
 import logic.demo.LorenzPoint;
 
@@ -15,7 +17,10 @@ import logic.demo.LorenzPoint;
  */
 class MainActivity : Activity {
 
-    PointGetter[] pointGetters; ///Gets points to graph
+    PointGetter truth; ///Gets truth
+    EnsembleLeader ensembleMean; ///Gets the mean value of the ensemble
+    EnsembleFollower[] ensembleMembers; ///Gets ensemble member points
+    PointGetter[] pointGetters; ///A list of all the point getters
     double[][] drawablePoints; ///All the points to be on the screen
     AxisAlignedBoundingBox!(int, 2) location; ///The location of the graph element
     dVector xScale; ///The range of x(time) values represented on the graph
@@ -23,7 +28,10 @@ class MainActivity : Activity {
     dVector yScale; ///The range of y values represented on the graph
     uint yTicks = 5; ///How many tick marks are represented on the y scale
     iVector[][] toDraw; ///The points to be drawn in a frame
-    Color[] colors; ///The colors of each of the curves to draw
+    Color truthColor; ///The color of the true curve
+    Color ensembleMeanColor; ///The color of the ensemble mean curve
+    Color ensembleColor; ///The color of the ensemble curves
+    Color[] colors; ///The list of all the colors for the curves
     Font font; ///The font with which to draw text
     bool isRunning; ///Whether the demo is paused
     double dt; ///How fast the scale moves in time
@@ -33,16 +41,41 @@ class MainActivity : Activity {
      * Constructor for the main activity
      * Organizes the components into locations 
      */
-    this(Display display, PointGetter[] pointGetters, Color[] colors, AxisAlignedBoundingBox!(int, 2) location, dVector xScale, dVector yScale, double dt) { 
+    this(
+            Display display, 
+            PointGetter truth, EnsembleLeader ensembleMean, EnsembleFollower[] ensembleMembers, 
+            Color truthColor, Color ensembleMeanColor, Color ensembleColor, 
+            AxisAlignedBoundingBox!(int, 2) location, 
+            dVector xScale, dVector yScale, 
+            double dt
+        ) { 
         super(display);
-        this.font = new Font("res/fonts/OpenSansRegular.ttf", 100);
-        this.pointGetters = pointGetters;
         this.location = location;
         this.xScale = xScale;
         this.yScale = yScale;
-        foreach(pointGetter; pointGetters) this.drawablePoints ~= pointGetter.points.timeAssociate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
-        foreach(pointGetter; pointGetters) this.toDraw ~= null;
-        this.colors = colors;
+        this.font = new Font("res/fonts/OpenSansRegular.ttf", 100);
+        //Truth
+        this.truth = truth;
+        this.drawablePoints ~= truth.points.timeAssociate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
+        this.toDraw ~= null;
+        this.truthColor = truthColor;
+        //Ensemble mean
+        this.ensembleMean = ensembleMean;
+        this.drawablePoints ~= ensembleMean.points.timeAssociate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
+        this.toDraw ~= null;
+        this.ensembleMeanColor = ensembleMeanColor;
+        //Ensemble members
+        this.ensembleMembers = ensembleMembers;
+        foreach(pointGetter; ensembleMembers) {
+            this.drawablePoints ~= pointGetter.points.timeAssociate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
+            this.toDraw ~= null;
+        }
+        this.ensembleColor = ensembleColor;
+
+        this.pointGetters = [this.truth, this.ensembleMean] ~ cast(PointGetter[]) this.ensembleMembers;
+        this.colors = [this.truthColor, this.ensembleMeanColor];
+        foreach(i; 0..this.ensembleMembers.length) this.colors ~= this.ensembleColor;
+
         this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
         this.dt = dt;
     }

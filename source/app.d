@@ -33,8 +33,8 @@ void main(){
 
     mainDisplay.activity = new MainActivity(
         mainDisplay, 
-        (cast(PointGetter[]) [truth]) ~ followers ~ (cast(PointGetter[]) [leader]),
-        colors,
+        truth, leader, [],
+        PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN,
         new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 16), new iVector(logicalSize.x * 3 / 4, logicalSize.y * 7 / 8)),
         new dVector(-20, 10),
         new dVector(-15, 15),
