@@ -33,6 +33,7 @@ void main(){
 	Display mainDisplay = new Display(640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE,
             "Assimilation Demo");
+    SDL_SetWindowFullscreen(mainDisplay.window.handle(), SDL_WINDOW_FULLSCREEN_DESKTOP);
     //Point getters
     LorenzPoint truth = new LorenzPoint(dt, startTime, 1, 1, 1);
     EnsembleLeader leader = new EnsembleLeader(new RK4(new Lorenz63()), new Ensemble([]), dt, 0);
