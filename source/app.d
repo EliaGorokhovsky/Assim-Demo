@@ -15,6 +15,17 @@ import logic.demo.GaussianObserver;
 import logic.integrators.RK4;
 import logic.systems.Lorenz63;
 
+/*
+ * Key bindings:
+ * F11 (use Fn + F11) - toggle fullscreen
+ * Esc - pause/unpause
+ * Tab - toggle showing ensemble
+ * Left/right arrows - scroll in time scale (only when paused)
+ * Space - center time scale on current time (only when paused)
+ * PgUp - toggle observations
+ * PgDn - toggle assimilation (assimilation only happens when observations are on, regardless of whether it's on or not)
+ * Grave (`) - reset program
+ */
 void main(){
 	double dt = 0.05;
     double observationFrequency = 1;
@@ -25,12 +36,13 @@ void main(){
     //Point getters
     LorenzPoint truth = new LorenzPoint(dt, startTime, 1, 1, 1);
     EnsembleLeader leader = new EnsembleLeader(new RK4(new Lorenz63()), new Ensemble([]), dt, 0);
-    leader.createEnsemble(1, 1, 1, 1, 1, 1, 5);
+    leader.createEnsemble(1, 1, 1, 1, 1, 1, 800);
     EnsembleFollower[] followers;
-    foreach(i; 0..leader.ensemble.size) {
+    //foreach(i; 0..leader.ensemble.size) {
+    foreach(i; 0..5) {
         followers ~= new EnsembleFollower(leader, cast(int)i);
     }
-    GaussianObserver observer = new GaussianObserver(1, 1, 1);
+    GaussianObserver observer = new GaussianObserver(0.5, 0.5, 0.5);
 
     mainDisplay.activity = new MainActivity(
         mainDisplay, 
@@ -48,6 +60,11 @@ void main(){
             if (mainDisplay.keyboard.allKeys[SDLK_F11].testAndRelease()) {
                 SDL_SetWindowFullscreen(mainDisplay.window.handle(), mainDisplay.window.info()
                         .canFind(SDL_WINDOW_FULLSCREEN_DESKTOP) ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+            }
+            if (mainDisplay.keyboard.allKeys[SDLK_BACKQUOTE].testAndRelease()) {
+                mainDisplay.isRunning = false;
+                mainDisplay.destroy();
+                main();
             }
         }
     };

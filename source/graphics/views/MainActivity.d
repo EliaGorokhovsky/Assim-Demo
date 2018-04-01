@@ -40,6 +40,9 @@ class MainActivity : Activity {
     Color[] colors; ///The list of all the colors for the curves
     Font font; ///The font with which to draw text
     bool isRunning; ///Whether the demo is paused
+    bool showingEnsemble; ///Whether ensemble members are also being graphed (false for speed and cleanness)
+    bool isAssimilating; ///Whether or not assimilation is happening
+    bool isObserving; ///Whether or not observations are being made
     double dt; ///How fast the scale moves in time
     double observationFrequency; ///How frequently measurements are taken
     double time = 0; ///Where the front is in time
@@ -121,6 +124,15 @@ class MainActivity : Activity {
     override void handleEvent(SDL_Event event) {
         if (this.container.keyboard.allKeys[SDLK_ESCAPE].testAndRelease()) {
             this.isRunning = !this.isRunning;
+        }
+        if (this.container.keyboard.allKeys[SDLK_TAB].testAndRelease()) {
+            this.showingEnsemble = !this.showingEnsemble;
+        }
+        if (this.container.keyboard.allKeys[SDLK_PAGEUP].testAndRelease()) {
+            this.isObserving = !this.isObserving;
+        }
+        if (this.container.keyboard.allKeys[SDLK_PAGEDOWN].testAndRelease()) {
+            this.isAssimilating = !this.isAssimilating;
         }
         if(!isRunning) {
             if(this.container.keyboard.allKeys[SDLK_LEFT].testAndRelease()) {
@@ -205,15 +217,19 @@ class MainActivity : Activity {
                 this.update(i);
             }
             if(abs(this.time % this.observationFrequency) < this.dt) {
-                Likelihood likelihood = new Likelihood(this.observer.observe(this.truth.position, this.time), this.observer.error);
-                this.assimilator.setLikelihood(likelihood);
-                this.ensembleMean.ensemble = this.assimilator(this.ensembleMean.ensemble);
-                //The following code makes the ensemble generate twice on assimilation. It may look nicer
-                //Comment if speed is a concern
-                /*this.ensembleMean.points.add(this.time, this.ensembleMean.ensemble.eMean.x);
-                foreach(point; this.ensembleMembers) {
-                    point.points.add(this.time, this.ensembleMean.ensemble.members[point.index].x);
-                }*/
+                if(this.isObserving) {
+                    Likelihood likelihood = new Likelihood(this.observer.observe(this.truth.position, this.time), this.observer.error);
+                    if(this.isAssimilating) {
+                        this.assimilator.setLikelihood(likelihood);
+                        this.ensembleMean.ensemble = this.assimilator(this.ensembleMean.ensemble);
+                        //The following code makes the ensemble generate twice on assimilation. It may look nicer
+                        //Comment if speed is a concern
+                        /*this.ensembleMean.points.add(this.time, this.ensembleMean.ensemble.eMean.x);
+                        foreach(point; this.ensembleMembers) {
+                            point.points.add(this.time, this.ensembleMean.ensemble.members[point.index].x);
+                        }*/
+                    }
+                }
             }
             this.updateObservations();
             double ensx = this.ensembleMean.ensemble.eMean.x;
@@ -243,15 +259,17 @@ class MainActivity : Activity {
         this.container.renderer.fill(this.location, PredefinedColor.WHITE);
         //Draw curves
         //Ensemble members
-        foreach(curve; 2..this.drawablePoints.length - 1) {
-            if(this.toDraw[curve].length > 1) {
-                foreach(i; 0..this.toDraw[curve].length - 1) {
-                    this.container.renderer.draw(new iSegment(this.toDraw[curve][i], this.toDraw[curve][i + 1]), this.colors[curve]);
+        if(this.showingEnsemble) {
+            foreach(curve; 2..this.drawablePoints.length - 1) {
+                if(this.toDraw[curve].length > 1) {
+                    foreach(i; 0..this.toDraw[curve].length - 1) {
+                        this.container.renderer.draw(new iSegment(this.toDraw[curve][i], this.toDraw[curve][i + 1]), this.colors[curve]);
+                    }
+                    //this.container.renderer.fill(new AxisAlignedBoundingBox!(int, 2)(this.toDraw[curve][$ - 1] - 5, new iVector(10, 10)), this.colors[curve]);  
+                } else if(this.toDraw[curve].length == 1) {
+                    this.container.renderer.draw(this.toDraw[curve][0]);
                 }
-                //this.container.renderer.fill(new AxisAlignedBoundingBox!(int, 2)(this.toDraw[curve][$ - 1] - 5, new iVector(10, 10)), this.colors[curve]);  
-            } else if(this.toDraw[curve].length == 1) {
-                this.container.renderer.draw(this.toDraw[curve][0]);
-            }
+            }            
         }
         //Truth
         if(this.toDraw[0].length > 1) {
