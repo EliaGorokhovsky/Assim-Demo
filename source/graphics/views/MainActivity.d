@@ -70,9 +70,9 @@ class MainActivity : Activity {
         ) { 
         super(display);
         this.location = location;
-        this.xScale = xScale;
+        this.xScale = new dVector(xScale);
         this.xOffset = new dVector(xScale);
-        this.yScale = yScale;
+        this.yScale = new dVector(yScale);
         this.dt = dt;
         this.observationFrequency = observationFrequency;
         this.font = new Font("res/fonts/OpenSansRegular.ttf", 100);
@@ -109,6 +109,21 @@ class MainActivity : Activity {
         
     }
 
+    /** 
+     * Toggles deleting extra points
+     * If turned on, also cleans up the timeseries
+     */
+    void toggleGarbageCollect() {
+        this.garbageCollect = !this.garbageCollect;
+        if(this.garbageCollect) {
+            foreach(pointGetter; [this.truth] ~ cast(PointGetter[])[this.ensembleMean] ~ cast(PointGetter[])this.ensembleMembers) {
+                while(pointGetter.points.times[1] < this.xScale.x) {
+                    pointGetter.points.pop(0);
+                }
+            }
+        }
+    }
+
     /**
      * Resets the scale to center the current time
      * Done in a separate function for expandability
@@ -133,6 +148,9 @@ class MainActivity : Activity {
         }
         if (this.container.keyboard.allKeys[SDLK_PAGEDOWN].testAndRelease()) {
             this.isAssimilating = !this.isAssimilating;
+        }
+        if (this.container.keyboard.allKeys[SDLK_BACKSPACE].testAndRelease()) {
+            this.toggleGarbageCollect();
         }
         if(!isRunning) {
             if(this.container.keyboard.allKeys[SDLK_LEFT].testAndRelease()) {
