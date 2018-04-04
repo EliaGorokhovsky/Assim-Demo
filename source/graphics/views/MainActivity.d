@@ -106,7 +106,8 @@ class MainActivity : Activity {
         this.colors = [this.truthColor, this.ensembleMeanColor];
         foreach(i; 0..this.ensembleMembers.length) this.colors ~= this.ensembleColor;
 
-        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32)), ["Truth", "Ensemble Mean", "Ensemble", "Observation"], [PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK], [LegendStyle.LINE, LegendStyle.LINE, LegendStyle.LINE, LegendStyle.POINT]);
+        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
+        this.components ~= new Legend(this.container, new iRectangle(this.location.initialPoint.x + this.location.extent.x * 3 / 4, this.location.initialPoint.y, this.location.extent.x * 1 / 4, this.location.extent.y * 1 / 4), ["Truth", "Ensemble Mean", "Ensemble", "Observation"], [PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK], [LegendStyle.LINE, LegendStyle.LINE, LegendStyle.LINE, LegendStyle.POINT]);
     }
 
     /** 
