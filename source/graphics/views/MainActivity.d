@@ -7,6 +7,7 @@ import std.math;
 import d2d;
 import graphics.Constants;
 import graphics.components.PauseButton;
+import graphics.components.Legend;
 import logic.assimilation.Assimilator;
 import logic.assimilation.likelihood.Likelihood;
 import logic.demo.EnsembleLeader;
@@ -105,8 +106,7 @@ class MainActivity : Activity {
         this.colors = [this.truthColor, this.ensembleMeanColor];
         foreach(i; 0..this.ensembleMembers.length) this.colors ~= this.ensembleColor;
 
-        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
-        
+        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32)), ["Truth", "Ensemble Mean", "Ensemble", "Observation"], [PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK], [LegendStyle.LINE, LegendStyle.LINE, LegendStyle.LINE, LegendStyle.POINT]);
     }
 
     /** 
