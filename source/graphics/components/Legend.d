@@ -18,6 +18,7 @@ class Legend : Component {
 
     iRectangle currentLocation;
     iRectangle textBox;
+    iRectangle exampleBox;
     int textHeight;
     Font font;
     string[] entries;
@@ -46,7 +47,8 @@ class Legend : Component {
         this.colors = colors;
         this.styles = styles;
         this.borderWidth = borderWidth;
-        this.textBox = new iRectangle(this.location.initialPoint.x, this.location.initialPoint.y + this.location.extent.y / 16, this.location.extent.x, this.location.extent.y * 27 / 32);
+        this.textBox = new iRectangle(this.location.initialPoint.x + 8 * this.location.extent.x / 27, this.location.initialPoint.y + this.location.extent.y / 16, this.location.extent.x * 2 / 3, this.location.extent.y * 27 / 32);
+        this.exampleBox = new iRectangle(this.location.initialPoint.x + borderWidth, this.location.initialPoint.y + this.location.extent.y / 16, 8 * this.location.extent.x / 27 - borderWidth, this.location.extent.y * 27 / 32);
         this.textHeight = this.textBox.extent.y / this.entries.length - this.location.extent.y / 32;
     }
 
@@ -73,6 +75,17 @@ class Legend : Component {
                 this.textHeight
             );
             this.container.renderer.copy(text, loc);
+            loc = new iRectangle(
+                this.exampleBox.initialPoint.x,
+                this.exampleBox.initialPoint.y + i * (this.textHeight + this.location.extent.y / 32),
+                this.exampleBox.extent.x,
+                this.textHeight
+            );
+            if(this.styles[i] == LegendStyle.LINE) {
+                this.container.renderer.fill(new iRectangle(loc.center.x - loc.extent.x / 4, loc.center.y - loc.extent.y / 8, loc.extent.x / 2, loc.extent.y / 4), this.colors[i]);
+            } else if(this.styles[i] == LegendStyle.POINT) {
+                this.container.renderer.fill(new iRectangle(loc.center.x - loc.extent.x / 8, loc.center.y - loc.extent.x / 8, loc.extent.x / 4, loc.extent.x / 4), this.colors[i]);
+            }
         }
         
     }
