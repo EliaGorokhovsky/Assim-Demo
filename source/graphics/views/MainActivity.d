@@ -17,6 +17,7 @@ import logic.demo.EnsembleFollower;
 import logic.demo.PointGetter;
 import logic.demo.LorenzPoint;
 import logic.demo.ErrorGenerator;
+import logic.demo.GaussianObserver;
 
 /**
  * The site of the main UI
@@ -30,7 +31,7 @@ class MainActivity : Activity {
     double[][] drawablePoints; ///All the points to be on the screen
     AxisAlignedBoundingBox!(int, 2) location; ///The location of the graph element
     dVector xScale; ///The range of x(time) values represented on the graph
-    int moveScale = 2; ///The factor by which xScale moves every button press, scaling dt
+    int moveScale = 5; ///The factor by which xScale moves every button press, scaling dt
     dVector xOffset; ///The default offset in time from the current running time
     uint xTicks = 4; ///How many tick marks are represented on the time scale
     dVector yScale; ///The range of y values represented on the graph
@@ -150,9 +151,11 @@ class MainActivity : Activity {
     void toggleGarbageCollect() {
         this.garbageCollect = !this.garbageCollect;
         if(this.garbageCollect) {
-            foreach(pointGetter; [this.truth] ~ cast(PointGetter[])[this.ensembleMean] ~ cast(PointGetter[])this.ensembleMembers) {
-                while(pointGetter.points.times[1] < this.xScale.x) {
-                    pointGetter.points.pop(0);
+            if(this.truth.points.times.length > 2) {
+                foreach(pointGetter; [this.truth] ~ cast(PointGetter[])[this.ensembleMean] ~ cast(PointGetter[])this.ensembleMembers) {
+                    while(pointGetter.points.times[1] < this.xScale.x) {
+                        pointGetter.points.pop(0);
+                    }
                 }
             }
         }
@@ -262,6 +265,7 @@ class MainActivity : Activity {
      * Action taken every frame
      */
     override void update() {
+        if(isAssimilating) isObserving = true;
         if(isRunning) {
             this.xScale += this.dt;
             this.time += this.dt;
@@ -373,8 +377,16 @@ class MainActivity : Activity {
         this.container.renderer.copy(text, new iRectangle(this.location.initialPoint.x - 10, this.location.initialPoint.y - 40 - logicalSize.y / 80, 20, 40));
         //Write RMSE
         text = new Texture(this.font.renderTextSolid(leftJustify("RMSE: " ~ this.RMSE.to!string, 12)), this.container.renderer);
-        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 12 / 16, logicalSize.y * 3 / 8, 240, 40));
+        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 45 / 64, logicalSize.y * 7 / 16, 240, 40));
         text = new Texture(this.font.renderTextSolid(leftJustify("xRMSE: " ~ this.xRMSE.to!string, 13)), this.container.renderer);
-        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 12 / 16, logicalSize.y * 3 / 8 - 45, 260, 40));
+        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 45 / 64, logicalSize.y * 7 / 16 - 45, 260, 40));
+        //Write info
+        int x = logicalSize.x * 45 / 64;
+        text = new Texture(this.font.renderTextSolid("Model: Lorenz \'63"), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(x, logicalSize.y * 1 / 8, 340, 40));
+        text = new Texture(this.font.renderTextSolid("Ensemble size: " ~ ensembleMean.ensemble.size.to!string), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(x, logicalSize.y * 1 / 8 + 45, 320, 40));
+        text = new Texture(this.font.renderTextSolid("Observer Error: " ~ (cast(GaussianObserver) this.observer).error.x.to!string), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(x, logicalSize.y * 1 / 8 + 90, 380, 40));
     }
 }
