@@ -31,6 +31,12 @@ class PauseButton : Button {
      */
     override void draw() {
         Texture text;
+        iRectangle textLocation = new iRectangle(
+            this.location.initialPoint.x + this.location.extent.x / 16, 
+            this.location.initialPoint.y + this.location.extent.y / 16,
+            this.location.extent.x * 7 / 8,
+            this.location.extent.y * 7 / 8
+        );
         if((cast(MainActivity) this.container.activity).isRunning) {
             this.container.renderer.fill(this.location, PredefinedColor.RED);
             text = new Texture((cast(MainActivity) this.container.activity).font.renderTextSolid("Stop"), this.container.renderer);
@@ -38,6 +44,6 @@ class PauseButton : Button {
             this.container.renderer.fill(this.location, PredefinedColor.GREEN);
             text = new Texture((cast(MainActivity) this.container.activity).font.renderTextSolid("Start"), this.container.renderer);
         }
-        this.container.renderer.copy(text, this.location);
+        this.container.renderer.copy(text, textLocation);
     }
 }

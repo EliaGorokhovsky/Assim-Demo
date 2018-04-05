@@ -45,7 +45,7 @@ void main(){
             truth, leader, followers, 
             observer, new EAKF(),
             PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK,
-            new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 16), new iVector(logicalSize.x * 3 / 4, logicalSize.y * 7 / 8)),
+            new AxisAlignedBoundingBox!(int, 2)(new iVector(logicalSize.x * 1 / 16, logicalSize.y * 1 / 8), new iVector(logicalSize.x * 5 / 8, logicalSize.y * 6 / 8)),
             xScale,
             yScale,
             dt, observationFrequency

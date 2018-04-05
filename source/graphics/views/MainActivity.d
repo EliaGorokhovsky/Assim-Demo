@@ -56,6 +56,7 @@ class MainActivity : Activity {
     double xRMSE; ///RMSE in x
     int numTimes = 0; ///How many times should be counted in RMSE
     bool garbageCollect; ///Should points off the screen be deleted? if false, demo may slow down but you'll be able to return
+    iRectangle RMSELocation; ///Where RMSE is displayed
 
     /**
      * Constructor for the main activity
@@ -72,6 +73,7 @@ class MainActivity : Activity {
         ) { 
         super(display);
         this.location = location;
+        this.RMSELocation = new iRectangle(this.location.bottomRight.x, this.location.initialPoint.y, this.logicalSize.x * 3 / 8, location.extent.y / 2);
         this.xScale = new dVector(xScale);
         this.xOffset = new dVector(xScale);
         this.yScale = new dVector(yScale);
@@ -108,14 +110,37 @@ class MainActivity : Activity {
         foreach(i; 0..this.ensembleMembers.length) this.colors ~= this.ensembleColor;
 
         //Components/Buttons
-        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
+        this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 45 / 64, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
         this.components ~= new Legend(this.container, new iRectangle(this.location.initialPoint.x + this.location.extent.x * 3 / 4, this.location.initialPoint.y, this.location.extent.x * 1 / 4, this.location.extent.y * 1 / 4), ["Truth", "Ensemble Mean", "Ensemble", "Observation"], [PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK], [LegendStyle.LINE, LegendStyle.LINE, LegendStyle.LINE, LegendStyle.POINT]);
-        iRectangle baseline = new iRectangle(logicalSize.x * 3 / 4, logicalSize.y * 1 / 32, logicalSize.x * 1 / 8, logicalSize.x * 1 / 64);
+        //Switched
+        int startY = logicalSize.y * 1 / 2 + logicalSize.x * 3 / 64; 
+        iRectangle baseline = new iRectangle(logicalSize.x * 45 / 64, startY, logicalSize.x * 17 / 64, logicalSize.x * 1 / 32);
         this.components ~= new ToggleGroup(this.container, 
-            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 1 / 2, baseline.initialPoint.y, baseline.extent.x * 1 / 4, baseline.extent.y), 
-            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 3 / 4, baseline.initialPoint.y, baseline.extent.x * 1 / 4, baseline.extent.y), 
-            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 1 / 2, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 2 / 3 + baseline.extent.x * 1 / 128, baseline.initialPoint.y, baseline.extent.x * 2 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 8 / 9 + baseline.extent.x * 1 / 64, baseline.initialPoint.y, baseline.extent.x * 1 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 2 / 3, baseline.extent.y), 
             &this.showingEnsemble, "Showing Ensemble"
+        );
+        baseline = new iRectangle(logicalSize.x * 45 / 64, startY + logicalSize.x * 9 / 256, logicalSize.x * 17 / 64, logicalSize.x * 1 / 32);
+        this.components ~= new ToggleGroup(this.container, 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 2 / 3 + baseline.extent.x * 1 / 128, baseline.initialPoint.y, baseline.extent.x * 2 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 8 / 9 + baseline.extent.x * 1 / 64, baseline.initialPoint.y, baseline.extent.x * 1 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 2 / 3, baseline.extent.y), 
+            &this.isObserving, "Observation"
+        );
+        baseline = new iRectangle(logicalSize.x * 45 / 64, startY + logicalSize.x * 9 / 128, logicalSize.x * 17 / 64, logicalSize.x * 1 / 32);
+        this.components ~= new ToggleGroup(this.container, 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 2 / 3 + baseline.extent.x * 1 / 128, baseline.initialPoint.y, baseline.extent.x * 2 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 8 / 9 + baseline.extent.x * 1 / 64, baseline.initialPoint.y, baseline.extent.x * 1 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 2 / 3, baseline.extent.y), 
+            &this.isAssimilating, "Assimilation"
+        );
+        baseline = new iRectangle(logicalSize.x * 45 / 64, startY + logicalSize.x * 27 / 256, logicalSize.x * 17 / 64, logicalSize.x * 1 / 32);
+        this.components ~= new ToggleGroup(this.container, 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 2 / 3 + baseline.extent.x * 1 / 128, baseline.initialPoint.y, baseline.extent.x * 2 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 8 / 9 + baseline.extent.x * 1 / 64, baseline.initialPoint.y, baseline.extent.x * 1 / 9, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 2 / 3, baseline.extent.y), 
+            &this.garbageCollect, "Garbage Collection"
         );
     }
 
@@ -348,10 +373,10 @@ class MainActivity : Activity {
         text = new Texture(this.font.renderTextSolid("x"), this.container.renderer);
         this.container.renderer.copy(text, new iRectangle(this.location.initialPoint.x - 10, this.location.initialPoint.y - 40 - logicalSize.y / 80, 20, 40));
         //Write RMSE
-        /*text = new Texture(this.font.renderTextSolid("RMSE: " ~ this.RMSE.to!string), this.container.renderer);
-        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10, 20 * (6 + this.RMSE.to!string.length), 40));
-        text = new Texture(this.font.renderTextSolid("xRMSE: " ~ this.xRMSE.to!string), this.container.renderer);
-        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10 - 45, 20 * (7 + this.xRMSE.to!string.length), 40));*/
+        text = new Texture(scaled(this.font.renderTextBlended("RMSE: " ~ this.RMSE.to!string), ), this.container.renderer);
+        this.container.renderer.copy(text, );
+        text = new Texture(this.font.renderTextBlended("xRMSE: " ~ this.xRMSE.to!string), this.container.renderer);
+        this.container.renderer.copy(text);
 
     }
 }
