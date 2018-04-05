@@ -65,7 +65,7 @@ void main(){
     int ensembleSize = 5;
     int ensembleShown = 5;
 
-    Display mainDisplay = new Display(640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
+    Display mainDisplay = new Display(640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE,
         "Assimilation Demo");
     mainDisplay.activity = reset(dt, observationFrequency, startTime, startX, startY, startZ, ensembleError, observerError, yScale, xScale, ensembleSize, ensembleShown, mainDisplay);
