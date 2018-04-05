@@ -15,10 +15,8 @@ class ToggleButton : Button {
     /**
      * Creates a pauseButton at a location
      */
-    this(Display container, iRectangle location, iRectangle nameLocation, iRectangle stateLocation, bool* param) {
+    this(Display container, iRectangle location, bool* param) {
         super(container, location);
-        this.nameLocation = nameLocation;
-        this.stateLocation = stateLocation;
         this.param = param;
     }
 

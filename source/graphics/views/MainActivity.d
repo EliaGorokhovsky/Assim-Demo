@@ -8,7 +8,7 @@ import d2d;
 import graphics.Constants;
 import graphics.components.PauseButton;
 import graphics.components.Legend;
-import graphics.components.ToggleButton;
+import graphics.components.ToggleGroup;
 import logic.assimilation.Assimilator;
 import logic.assimilation.likelihood.Likelihood;
 import logic.demo.EnsembleLeader;
@@ -110,7 +110,13 @@ class MainActivity : Activity {
         //Components/Buttons
         this.components ~= new PauseButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y / 2, logicalSize.x * 1 / 16, logicalSize.x / 32));
         this.components ~= new Legend(this.container, new iRectangle(this.location.initialPoint.x + this.location.extent.x * 3 / 4, this.location.initialPoint.y, this.location.extent.x * 1 / 4, this.location.extent.y * 1 / 4), ["Truth", "Ensemble Mean", "Ensemble", "Observation"], [PredefinedColor.RED, PredefinedColor.BLUE, PredefinedColor.GREEN, PredefinedColor.BLACK], [LegendStyle.LINE, LegendStyle.LINE, LegendStyle.LINE, LegendStyle.POINT]);
-        this.components ~= new ToggleButton(this.container, new iRectangle(logicalSize.x * 7 / 8, logicalSize.y * 3 / 4, logicalSize.x * 1 / 16, logicalSize.x * 1 / 32), new iRectangle(0,0,0,0), new iRectangle(0,0,0,0), &this.showingEnsemble);
+        iRectangle baseline = new iRectangle(logicalSize.x * 3 / 4, logicalSize.y * 1 / 32, logicalSize.x * 1 / 8, logicalSize.x * 1 / 64);
+        this.components ~= new ToggleGroup(this.container, 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 1 / 2, baseline.initialPoint.y, baseline.extent.x * 1 / 4, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x + baseline.extent.x * 3 / 4, baseline.initialPoint.y, baseline.extent.x * 1 / 4, baseline.extent.y), 
+            new iRectangle(baseline.initialPoint.x, baseline.initialPoint.y, baseline.extent.x * 1 / 2, baseline.extent.y), 
+            &this.showingEnsemble, "Showing Ensemble"
+        );
     }
 
     /** 
@@ -342,10 +348,10 @@ class MainActivity : Activity {
         text = new Texture(this.font.renderTextSolid("x"), this.container.renderer);
         this.container.renderer.copy(text, new iRectangle(this.location.initialPoint.x - 10, this.location.initialPoint.y - 40 - logicalSize.y / 80, 20, 40));
         //Write RMSE
-        text = new Texture(this.font.renderTextSolid("RMSE: " ~ this.RMSE.to!string), this.container.renderer);
+        /*text = new Texture(this.font.renderTextSolid("RMSE: " ~ this.RMSE.to!string), this.container.renderer);
         this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10, 20 * (6 + this.RMSE.to!string.length), 40));
         text = new Texture(this.font.renderTextSolid("xRMSE: " ~ this.xRMSE.to!string), this.container.renderer);
-        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10 - 45, 20 * (7 + this.xRMSE.to!string.length), 40));
+        this.container.renderer.copy(text, new iRectangle(this.location.bottomRight.x + logicalSize.x / 20, this.location.bottomRight.y - logicalSize.y / 10 - 45, 20 * (7 + this.xRMSE.to!string.length), 40));*/
 
     }
 }
