@@ -4,6 +4,7 @@ import std.algorithm;
 import std.array;
 import std.conv;
 import std.math;
+import std.string;
 import d2d;
 import graphics.Constants;
 import graphics.components.PauseButton;
@@ -56,8 +57,7 @@ class MainActivity : Activity {
     double xRMSE; ///RMSE in x
     int numTimes = 0; ///How many times should be counted in RMSE
     bool garbageCollect; ///Should points off the screen be deleted? if false, demo may slow down but you'll be able to return
-    iRectangle RMSELocation; ///Where RMSE is displayed
-
+    
     /**
      * Constructor for the main activity
      * Organizes the components into locations 
@@ -73,7 +73,6 @@ class MainActivity : Activity {
         ) { 
         super(display);
         this.location = location;
-        this.RMSELocation = new iRectangle(this.location.bottomRight.x, this.location.initialPoint.y, this.logicalSize.x * 3 / 8, location.extent.y / 2);
         this.xScale = new dVector(xScale);
         this.xOffset = new dVector(xScale);
         this.yScale = new dVector(yScale);
@@ -373,10 +372,9 @@ class MainActivity : Activity {
         text = new Texture(this.font.renderTextSolid("x"), this.container.renderer);
         this.container.renderer.copy(text, new iRectangle(this.location.initialPoint.x - 10, this.location.initialPoint.y - 40 - logicalSize.y / 80, 20, 40));
         //Write RMSE
-        text = new Texture(scaled(this.font.renderTextBlended("RMSE: " ~ this.RMSE.to!string), ), this.container.renderer);
-        this.container.renderer.copy(text, );
-        text = new Texture(this.font.renderTextBlended("xRMSE: " ~ this.xRMSE.to!string), this.container.renderer);
-        this.container.renderer.copy(text);
-
+        text = new Texture(this.font.renderTextSolid(leftJustify("RMSE: " ~ this.RMSE.to!string, 12)), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 12 / 16, logicalSize.y * 3 / 8, 240, 40));
+        text = new Texture(this.font.renderTextSolid(leftJustify("xRMSE: " ~ this.xRMSE.to!string, 13)), this.container.renderer);
+        this.container.renderer.copy(text, new iRectangle(logicalSize.x * 12 / 16, logicalSize.y * 3 / 8 - 45, 260, 40));
     }
 }
