@@ -8,8 +8,6 @@ import graphics.views.MainActivity;
  */
 class PauseButton : Button {
 
-    bool isRunning; ///Whether the demo is running; determines what the button says
-
     /**
      * Creates a pauseButton at a location
      */
@@ -32,9 +30,8 @@ class PauseButton : Button {
      * Draws the button with different colors depending on its state - compressed or decompressed
      */
     override void draw() {
-        this.isRunning = (cast(MainActivity) this.container.activity).isRunning;
         Texture text;
-        if(this.isRunning) {
+        if((cast(MainActivity) this.container.activity).isRunning) {
             this.container.renderer.fill(this.location, PredefinedColor.RED);
             text = new Texture((cast(MainActivity) this.container.activity).font.renderTextSolid("Stop"), this.container.renderer);
         } else {
