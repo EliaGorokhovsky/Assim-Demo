@@ -249,6 +249,9 @@ class MainActivity : Activity {
      */
     void updateObservations() {
         double[double] associate = this.observer.points.timeAssociate;
+        if(this.xScale.x > this.observer.points.times[0] && this.garbageCollect) {
+            observer.points.pop(0);
+        }
         this.drawablePoints[$ - 1] = associate.keys.filter!(a => (this.xScale.x <= a && a <= this.xScale.y)).array;
         this.toDraw[$ - 1] = null;
         foreach(val; this.drawablePoints[$ - 1].sort) {
